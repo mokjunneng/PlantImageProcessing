@@ -152,7 +152,8 @@ def main():
         thread.join()
 
     # Calculate growth by gradient of the linear regression line
-    calculate_growth_from_surface_area(SURFACE_AREA_RESULTS_FILE)
+    if not args.stereo:
+        calculate_growth_from_surface_area(SURFACE_AREA_RESULTS_FILE)
 
     print("Image processing done.")
 

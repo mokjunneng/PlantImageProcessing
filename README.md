@@ -11,7 +11,7 @@ Processing pipeline and workflow:
 `python main.py [-s --stereo] [-d --startdate '$Y-%m-%d'] [-t --thread_count int]`
 ### Command-line arguments:
 `-s --stereo`        If specified, images from both cameras will be returned for stereo image reconstruction.  
-`-d --startdate`     If specified, images since the input start date will be retrieved.  
+`-d --startdate`     If specified, images since the input start date will be retrieved. Else, the default start date will be a week before from current date  
 `-t --thread_count`  Specify the number of worker threads to process the images.  
 
 # Note
