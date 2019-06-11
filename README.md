@@ -10,9 +10,9 @@ Processing pipeline and workflow:
 # Instructions to run
 `python main.py [-s --stereo] [-d --startdate '$Y-%m-%d'] [-t --thread_count int]`
 ### Command-line arguments:
-`-s --stereo`        If specified, images from both cameras will be returned for stereo image reconstruction.
-`-d --startdate`     If specified, images since the input start date will be retrieved.
-`-t --thread_count`  Specify the number of worker threads to process the images.
+`-s --stereo`        If specified, images from both cameras will be returned for stereo image reconstruction.  
+`-d --startdate`     If specified, images since the input start date will be retrieved.  
+`-t --thread_count`  Specify the number of worker threads to process the images.  
 
 # Note
 Make sure aws is configured with the right access and secret keys to access S3 storage
