@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta, date
 import os
 import shutil
 import threading
@@ -11,11 +11,14 @@ from scipy.ndimage.filters import median_filter
 
 from s3helper import get_images_key, download_images, get_latest_image_key
 from image_processing import hsv_custom_range_threshold, rgb_custom_range_threshold, pseudo_surface_area, color_analysis, undistort_image
+from growth import calculate_growth_from_surface_area
 
 TEMP_IMAGE_STORAGE_DIR = "tmp"
 PROCESSED_IMAGE_DIR = "output-images"
 COLOR_BINS_DIR = "color-bins"
 IMAGE_STORAGE_DIR = "stored"
+SURFACE_AREA_RESULTS_FILE = "surface_area_results.txt"
+DEFAULT_DURATION = 7
 
 # Parse command-line arguments (not used for now)
 def options():
@@ -95,7 +98,7 @@ def run_image_processing_workflow(image):
     outfile = os.path.join(PROCESSED_IMAGE_DIR, image.split(".")[0] + "_mask.png")
     print(f"Writing image file {outfile}")
     cv2.imwrite(outfile, denoised_mask)
-    with open("surface_area_results.txt", "a") as f:
+    with open(SURFACE_AREA_RESULTS_FILE, "a") as f:
         f.write(f"{outfile} {surface_area} {area_percentage} \n")
     np.save(os.path.join(COLOR_BINS_DIR, image.split(".")[0] + "_colorbins.npy"), histogram_bins)
 
@@ -109,7 +112,7 @@ def run_image_processing_workflow(image):
 # Main Worflow
 def main():
     # Remove files
-    # os.remove("surface_area_results.txt")
+    os.remove(SURFACE_AREA_RESULTS_FILE)
 
     # Create directories if not exist
     if not os.path.exists(PROCESSED_IMAGE_DIR):
@@ -123,9 +126,11 @@ def main():
     # start_date = None
     if args.startdate:
         start_date = datetime.strptime(args.startdate, '%Y-%m-%d').timestamp()
-        image_keys = get_images_key(start_date=start_date, stereo=args.stereo)
     else:
-        image_keys = get_latest_image_key(stereo=args.stereo)
+        start_date = (date.today() - timedelta(days=DEFAULT_DURATION))
+        start_date = datetime(year=start_date.year, month=start_date.month, day=start_date.day).timestamp()
+    print(start_date)
+    image_keys = get_images_key(start_date=start_date, stereo=args.stereo)
     download_images(image_keys)
 
     # Run image processing workflow
@@ -145,6 +150,10 @@ def main():
         threads.append(thread)
     for thread in threads:
         thread.join()
+
+    # Calculate growth by gradient of the linear regression line
+    calculate_growth_from_surface_area(SURFACE_AREA_RESULTS_FILE)
+
     print("Image processing done.")
 
 if __name__ == "__main__":
