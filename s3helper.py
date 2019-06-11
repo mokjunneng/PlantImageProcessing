@@ -42,7 +42,16 @@ def get_images_key(start_date=None, stereo=False):
     return truncated_objs
 
 def get_latest_image_key(stereo=False):
-    return
+    format = "%Y-%m-%d-T%H:%M:%SZ"
+    get_upload_time = lambda obj : int(datetime.strptime(obj['Key'].split('/')[-1].split('_')[0], format).timestamp())
+    objs = s3.list_objects_v2(
+        Bucket=BUCKET_NAME,
+    )['Contents']
+    sorted_objs = [obj['Key'] for obj in sorted(objs, key=get_upload_time, reverse=True)]
+    if not stereo:
+        return [sorted_objs[0]]
+    else:
+        return [sorted_objs[0], sorted_objs[1]]
 
 def download_images(image_keys):
     if not os.path.exists(TEMP_IMAGE_STORAGE_DIRECTORY):
