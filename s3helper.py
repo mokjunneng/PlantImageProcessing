@@ -1,7 +1,7 @@
 import boto3
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, date
 
 
 #TODO: Implement logging
@@ -11,7 +11,7 @@ TEMP_IMAGE_STORAGE_DIRECTORY = "tmp"
 
 s3 = boto3.client("s3")
 
-def get_images_key(start_date=None, stereo=False):
+def get_images_key(start_date, end_date, stereo=False):
     """
     Args:
         start_date: returns image keys beyond the date given here (float timestamp)
@@ -20,9 +20,13 @@ def get_images_key(start_date=None, stereo=False):
         List of image key names
     """
     format = "%Y-%m-%d-T%H:%M:%SZ"
+    startafter_format = "%Y-%m-%d-T%H"
+    startafter = date.fromtimestamp(start_date).strftime(startafter_format)
+    print(startafter)
     get_upload_time = lambda obj : int(datetime.strptime(obj['Key'].split('/')[-1].split('_')[0], format).timestamp())
     objs = s3.list_objects_v2(
         Bucket=BUCKET_NAME,
+        StartAfter="data/images/" + startafter,
     )['Contents']
     # Get reverse sorted s3 objects
     sorted_objs = [obj['Key'] for obj in sorted(objs, key=get_upload_time, reverse=True)]
@@ -33,8 +37,9 @@ def get_images_key(start_date=None, stereo=False):
     for obj in sorted_objs:
         new_obj = obj.split('/')[-1].split('_')
         upload_date = new_obj[0]
+        upload_date = datetime.strptime(upload_date, format).timestamp()
         camera_num = get_camera_num(new_obj[1])
-        if datetime.strptime(upload_date, format).timestamp() >= start_date:
+        if upload_date >= start_date and upload_date <= end_date:
             if stereo:
                 truncated_objs.append(obj)
             elif not stereo and camera_num == 1:

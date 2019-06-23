@@ -20,14 +20,19 @@ IMAGE_STORAGE_DIR = "stored"
 SURFACE_AREA_RESULTS_FILE = "surface_area_results.txt"
 DEFAULT_DURATION = 7
 
-# Parse command-line arguments (not used for now)
 def options():
     parser = argparse.ArgumentParser(description="Imaging processing with opencv")
     parser.add_argument(
         "-d",
         "--startdate",
-        help="Get images since [start-date], else return all images by default. Date format: %Y-%m-%d",
-        required=False
+        help="Get images since [startdate]. Date format: %Y-%m-%d-%H",
+        required=True
+    )
+    parser.add_argument(
+        "-e",
+        "--enddate",
+        help="Get images until [enddate]. Date format: %Y-%m-%d-%H",
+        required=True
     )
     parser.add_argument(
         "-s",
@@ -43,11 +48,6 @@ def options():
         default=5,
         type=int
     )
-    # parser.add_argument("-i", "--image", help="Input image file.", required=True)
-    # parser.add_argument("-o", "--outdir", help="Output directory for image files.", required=False)
-    # parser.add_argument("-r","--result", help="result file.", required= False )
-    # parser.add_argument("-w","--writeimg", help="write out images.", default=False, action="store_true")
-    # parser.add_argument("-D", "--debug", help="can be set to 'print' or None (or 'plot' if in jupyter) prints intermediate images.", default=None)
     args = parser.parse_args()
     return args
 
@@ -111,8 +111,12 @@ def run_image_processing_workflow(image):
 
 # Main Worflow
 def main():
+    if not args.startdate and not args.enddate:
+        print("Please provide arguments for [-s start_date] and [-e end_date]")
+        return
     # Remove files
-    os.remove(SURFACE_AREA_RESULTS_FILE)
+    if os.path.exists(SURFACE_AREA_RESULTS_FILE):
+        os.remove(SURFACE_AREA_RESULTS_FILE)
 
     # Create directories if not exist
     if not os.path.exists(PROCESSED_IMAGE_DIR):
@@ -124,13 +128,14 @@ def main():
 
     # Download images from S3
     # start_date = None
-    if args.startdate:
-        start_date = datetime.strptime(args.startdate, '%Y-%m-%d').timestamp()
-    else:
-        start_date = (date.today() - timedelta(days=DEFAULT_DURATION))
-        start_date = datetime(year=start_date.year, month=start_date.month, day=start_date.day).timestamp()
-    print(start_date)
-    image_keys = get_images_key(start_date=start_date, stereo=args.stereo)
+    # if args.startdate:
+    #     start_date = datetime.strptime(args.startdate, '%Y-%m-%d').timestamp()
+    # else:
+    #     start_date = (date.today() - timedelta(days=DEFAULT_DURATION))
+    #     start_date = datetime(year=start_date.year, month=start_date.month, day=start_date.day).timestamp()
+    start_date = datetime.strptime(args.startdate, '%Y-%m-%d-%H').timestamp()
+    end_date = datetime.strptime(args.enddate, '%Y-%m-%d-%H').timestamp()
+    image_keys = get_images_key(start_date=start_date, end_date=end_date, stereo=args.stereo)
     download_images(image_keys)
 
     # Run image processing workflow

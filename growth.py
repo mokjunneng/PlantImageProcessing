@@ -14,6 +14,7 @@ def calculate_growth_from_surface_area(file):
                 surface_area_arr.append(surface_area)
     # plot_surface_area(surface_area_arr)
     Y = np.array(surface_area_arr)
+    plot_surface_area(Y)
     X = np.arange(len(surface_area_arr)).reshape(-1, 1)
     model = LinearRegression().fit(X, Y)
     params = model.coef_
@@ -24,7 +25,8 @@ def plot_surface_area(arr):
     plt.ylabel('Surface area')
     plt.yticks([])
     plt.xlabel('Time')
-    plt.show()
+    plt.savefig("growth_curve.png")
+    plt.clf()
 
 if __name__ == "__main__":
     calculate_growth_from_surface_area("surface_area_results.txt")
