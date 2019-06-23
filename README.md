@@ -9,10 +9,11 @@ Processing pipeline and workflow:
   * Color channel histogram data is stored in `./color-bins` as `.npy` files. It is a dictionary of numpy array histogram values for each channel. E.g. `{'r': [100, 2, ... 320], 'g': [42, 32, ..., 22], 'b':[69, 23, ..., 0]}`
 
 # Instructions to run
-`python main.py [-s --stereo] [-d --startdate '$Y-%m-%d'] [-t --thread_count int]`
+`python main.py [-s --stereo] [-d --startdate '$Y-%m-%d-%H'] [-e --enddate '$Y-%m-%d-%H'] [-t --thread_count int]`
 ### Command-line arguments:
 `-s --stereo`        If specified, images from both cameras will be returned for stereo image reconstruction.  
-`-d --startdate`     If specified, images since the input start date will be retrieved. Else, the default start date will be a week before from current date  
+`-d --startdate`     Filter images since this date time  (required)
+`-e --enddate`       Filter images till this date time  (required)
 `-t --thread_count`  Specify the number of worker threads to process the images.  
 
 # Note
