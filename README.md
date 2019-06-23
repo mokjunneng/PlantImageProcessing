@@ -4,8 +4,9 @@ Processing pipeline and workflow:
 1. Extract plant images from Amazon S3 and store in `./tmp` directory.
 2. Process `tmp` images using custom range thresholding and some cv2 functions where processed images (plants' binary mask) will be stored in `./output-images` directory.
 3. Results information
-    a. Pixel surface area data is stored in `surface_area_results.txt`
-    b. Color channel histogram data is stored in `./color-bins` as `.npy` files. It is a dictionary of numpy array histogram values for each channel. E.g. `{'r': [100, 2, ... 320], 'g': [42, 32, ..., 22], 'b':[69, 23, ..., 0]}`
+  * Pixel surface area data is stored in `surface_area_results.txt`
+  * If stereo=False, growth information will be calculated from the surface area results where result will be stored in `growth.npy`
+  * Color channel histogram data is stored in `./color-bins` as `.npy` files. It is a dictionary of numpy array histogram values for each channel. E.g. `{'r': [100, 2, ... 320], 'g': [42, 32, ..., 22], 'b':[69, 23, ..., 0]}`
 
 # Instructions to run
 `python main.py [-s --stereo] [-d --startdate '$Y-%m-%d'] [-t --thread_count int]`
